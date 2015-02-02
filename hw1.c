@@ -16,6 +16,10 @@
 //
 //
 int main( int argc, char** argv ) {
+	if (argc < 2){
+		printf("please supply a filename\nusage: %s <filename>\n", argv[0]);
+		return 1;
+	}
 	v_struct vray[TOTAL_VECS];
 	int length, i;
 	// --------------------------------
@@ -36,7 +40,7 @@ int main( int argc, char** argv ) {
 	//
 
 	// vray is a pointer, and an 'out' param of read()
-	length = read("vectors.txt", vray);
+	length = read(argv[1], vray);
 	for (i = 0; i < TOTAL_VECS; i++){
 		printf("r = %.2f, theta = %.2f degrees, theta = %.2f radians, x_comp = %.2f, y_comp = %.2f\n", vray[i].r, vray[i].theta, degtorad(vray[i].theta), x_component(&(vray[i])), y_component(&(vray[i])));
 	}	

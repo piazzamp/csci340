@@ -77,6 +77,7 @@ int read( char* file_name, v_struct* p_vec_array){
 			count++;
 		}		
 	}
+	fclose(fp);
 	return count;
 }
 
