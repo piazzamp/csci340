@@ -171,3 +171,7 @@ function:
 
 */
 void cleanup( command_t* p_cmd );
+
+
+// custom string utility
+int samestr(const char *a, const char *b);

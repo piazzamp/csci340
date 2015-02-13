@@ -27,9 +27,9 @@ void cleanup( command_t* p_cmd );
 //        by Matt Piazza			//
 //-------------------------------//
 void parse( char* line, command_t* p_cmd ){
-	int i, arglength = 0, argcount = 0, argiter = 0, j;
-	for (i = 0; line[i] != '\0'; i++){ // loop through the string once
-		if (line[i] == ' '){
+	int i, arglength = 0, argcount = 1, argiter = 0, j;
+	for (i = 0; line[i] != '\0' && line[i] != '\n'; i++){ // loop through the string once	
+		if (line[i] == ' ' /* && line[i + 1] != ' ' && line[i + 1] != '\n' && line[i + 1] != '\0' */){
 			argcount++; // not always -- think trailing space
 			while (line[i] == ' '){ // eat any extra spaces
 				i++;						// what happens with a trailing space?
@@ -42,7 +42,7 @@ void parse( char* line, command_t* p_cmd ){
 	}
 	// now we know enough to create our argument vector
 	// (but not enough to allocate the strings for it)
-	char **args = (char **) malloc(sizeof(char *) * argcount);
+	char **args = (char **) malloc(sizeof(char *) * (argcount + 1));
 
 	i = 0;
 	// i holds the starting position of each arg
@@ -50,9 +50,10 @@ void parse( char* line, command_t* p_cmd ){
 		// loop through the line to allocate and populate args[]
 		// first: determine argument length and allocate n+1 chars
 		arglength = 0;
-		while (line[i + arglength] != ' '){
+		while (line[i + arglength] != ' ' && line[i + arglength] != '\n' && line[i + arglength] != '\0'){
 			arglength++;
 		}
+		if (DEBUG) { printf("allocating chars for argv[%d]\n", argiter); }
       args[argiter] = (char*) malloc(sizeof(char) * (arglength + 1));		
       for (j = i; j - i < arglength; j++){
          args[argiter][j - i] = line[j];
@@ -70,17 +71,20 @@ void parse( char* line, command_t* p_cmd ){
 			printf("args[%d] = '%s'\n", i, args[i]);
 		}
 	}
+	if (DEBUG) { printf("assigning p_cmd components @ %p\n", p_cmd); }
 	p_cmd->name = args[0];
 	p_cmd->argc = argcount;
 	p_cmd->argv = args;
-	// change here if the first element in argv should _NOT_ be the command name
+	// don't double free name & argv[0]	
 }
 
 
 int execute( command_t* p_cmd ){
 	int found = 0;
-	char *fpath = NULL;
+	char fpath[256];
+	// fpath can be on the stack ie: char fpath[];
 	found = find_fullpath(fpath, p_cmd);
+	if (DEBUG) { printf("forking, hold on to ur butts\n"); }
 	pid_t pid = fork();
 	if (found){
 		if (pid == 0){ 
@@ -102,8 +106,7 @@ int find_fullpath( char* fullpath, command_t* p_cmd){
 	// first check if p_cmd->name is a fully qualified path to an executable
 	char *path = getenv("PATH\0");
 	char *testpath = (char *) malloc(sizeof(char) * PATHSIZE);
-	int startingchar = 0, i = 0, found = 0, j, k;
-	struct stat status;
+	int startingchar = 0, i = 0, found = 0, j, k;	
 	while (path[i] != '\0' && path[i - 1] != '\0' && !found){
 		for (j = 0; j < PATHSIZE; j++){
 			testpath[j] = '\0';
@@ -116,7 +119,7 @@ int find_fullpath( char* fullpath, command_t* p_cmd){
 			j++;
 		} 
 		if (DEBUG){
-			printf("colon found at index %d in %s\n", i, path);
+			// printf("colon found at index %d in %s\n", i, path);
 		}
 		testpath[j] = '/';
 		// testpath[i + 1]  = '\0';
@@ -128,20 +131,75 @@ int find_fullpath( char* fullpath, command_t* p_cmd){
 		if (DEBUG){ printf("testpath = %s\ni:%d\n\n", testpath, i); }
 		//stat(testpath, &status);
 		//if (DEBUG) { printf(); }
-		//if (status.st_mode == S_IXOTH){
+		//if (status.st_mode & S_IXOTH){
 			// file found and is executable by 'others'
 		if (fopen(testpath, "r") != NULL){
 			// file is exists and is readable
 			for (j = 0; testpath[j] != '\0'; j++){
+				// if (DEBUG){ printf("copying %c to fullpath[%d]\n", testpath[j], j); }
 				fullpath[j] = testpath[j];
-			}	
-			if (DEBUG) { printf("in fullpath, fullpath = '%s' @ %p\n", fullpath, fullpath); }
+			}
+			// if (DEBUG) { printf("j: %d\n", j); }
+			fullpath[j] = '\0';
+			if (DEBUG) { 
+				printf("fullpath[j]: %c, fullpath[j + 1]: %c\n", fullpath[j], fullpath[j + 1]);
+				printf("in fullpath, fullpath = '%s' @ %p\n", fullpath, fullpath); }
 			return 1;
 		}
 		startingchar = ++i;
 	}
+	free(testpath);
 	return 0;
 }
-// int is_builtin( command_t* p_cmd );
-// int do_builtin( command_t* p_cmd );
-// void cleanup( command_t* p_cmd );
+
+int samestr(const char *a, const char *b){
+	int i;
+	for (i = 0; a[i] != '\0' && b[i] != '\0'; i++){
+		if (a[i] != b[i]){
+			return 0;
+		}
+	}
+	if (DEBUG){
+		printf("in samestr: i: %d, a[i]: %c, b[i]: %c\n", i, a[i], b[i]);
+	}
+	if (a[i] == '\0' && b[i] == '\0'){
+		return 1;
+	}
+	else{
+		return 0;
+	}
+}
+
+int is_builtin( command_t* p_cmd ){
+	int i;
+	for (i = 0; valid_builtin_commands[i] != NULL; i++){
+		if (samestr(valid_builtin_commands[i], p_cmd->name)){
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int do_builtin( command_t* p_cmd ){
+	if (samestr(p_cmd->name, "cd")){
+		int success = chdir(p_cmd->argv[1]);
+		// chdir returns -1 on fail, 0 on success
+		return success + 1;
+	}
+	else if (samestr(p_cmd->name, "exit")){	
+		// will never reach this since it's handled in main's while loop
+		return 1;
+	}
+	return 0; // ?
+}
+void cleanup( command_t* p_cmd ){
+	// p_cmd->name == p_cmd->argv[0]
+	// do not double free it!
+	int i;
+	for (i = 0; p_cmd->argv[i] != NULL; i++){
+		// free each of the strings in argv
+		free(p_cmd->argv[i]);
+	}
+	// then free the array of pointers itself
+	free(p_cmd->argv);
+}
