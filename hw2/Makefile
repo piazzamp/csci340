@@ -20,4 +20,4 @@ run:
 
 tarball:
 	# put your tar command here
-	# tar -cvzf <lastname>.tar.gz *
+	tar -cvzf piazza.tar.gz *

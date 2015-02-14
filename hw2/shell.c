@@ -10,7 +10,7 @@
 #include <sys/stat.h>
 #include "shell.h"
 
-#define DEBUG 1
+#define DEBUG 0
 #define PATHSIZE 256
 
 const char* valid_builtin_commands[] = {"cd", "exit", NULL};
@@ -107,42 +107,31 @@ int find_fullpath( char* fullpath, command_t* p_cmd){
 	char *path = getenv("PATH\0");
 	char *testpath = (char *) malloc(sizeof(char) * PATHSIZE);
 	int startingchar = 0, i = 0, found = 0, j, k;	
+	struct stat status;
 	while (path[i] != '\0' && path[i - 1] != '\0' && !found){
 		for (j = 0; j < PATHSIZE; j++){
 			testpath[j] = '\0';
 		}
-		//currentpath = &(path[startingchar]);
 		int j = 0;
 		while(path[i] != ':' && path[i] != '\0'){
 			testpath[j] = path[i];
 			i++;
 			j++;
-		} 
-		if (DEBUG){
-			// printf("colon found at index %d in %s\n", i, path);
 		}
-		testpath[j] = '/';
-		// testpath[i + 1]  = '\0';
+		testpath[j] = '/';	
 		k = 0;
 		for (j += 1; p_cmd->name[k] != '\0'; j++){
 			testpath[j] = p_cmd->name[k];
 			k++;
-		}
-		if (DEBUG){ printf("testpath = %s\ni:%d\n\n", testpath, i); }
-		//stat(testpath, &status);
-		//if (DEBUG) { printf(); }
-		//if (status.st_mode & S_IXOTH){
-			// file found and is executable by 'others'
-		if (fopen(testpath, "r") != NULL){
-			// file is exists and is readable
+		}	
+		found = stat(testpath, &status) + 1;	
+		if (found && (status.st_mode & S_IFREG)){
+			// file found & is accessible
 			for (j = 0; testpath[j] != '\0'; j++){
-				// if (DEBUG){ printf("copying %c to fullpath[%d]\n", testpath[j], j); }
 				fullpath[j] = testpath[j];
-			}
-			// if (DEBUG) { printf("j: %d\n", j); }
+			}	
 			fullpath[j] = '\0';
 			if (DEBUG) { 
-				printf("fullpath[j]: %c, fullpath[j + 1]: %c\n", fullpath[j], fullpath[j + 1]);
 				printf("in fullpath, fullpath = '%s' @ %p\n", fullpath, fullpath); }
 			return 1;
 		}
@@ -184,13 +173,16 @@ int do_builtin( command_t* p_cmd ){
 	if (samestr(p_cmd->name, "cd")){
 		int success = chdir(p_cmd->argv[1]);
 		// chdir returns -1 on fail, 0 on success
-		return success + 1;
+		if (success == 0){
+			return SUCCESSFUL;
+		}
+		return ERROR;
 	}
 	else if (samestr(p_cmd->name, "exit")){	
 		// will never reach this since it's handled in main's while loop
-		return 1;
+		return SUCCESSFUL;
 	}
-	return 0; // ?
+	return ERROR; // ?
 }
 void cleanup( command_t* p_cmd ){
 	// p_cmd->name == p_cmd->argv[0]

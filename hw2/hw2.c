@@ -10,7 +10,7 @@
 #include <sys/stat.h>
 #include "shell.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 // -----------------------------------
 // Main function 
@@ -37,7 +37,7 @@ int main( int argc, char** argv ) {
 	//			error()
 	// 		cleanup( ... )
 	//
-	int done = 0, i = 0;
+	int done = 0, i = 0, status;
 	char line[256], path[256];
 	command_t currentcmd;
 	while(!done){
@@ -53,7 +53,10 @@ int main( int argc, char** argv ) {
 				done = 1;
 			}
 			else if (is_builtin(&currentcmd)){
-				do_builtin(&currentcmd);
+				status = do_builtin(&currentcmd);
+				if (status == ERROR){
+					fprintf(stderr, "sorry, there was an issue with your builtin: %s\n", currentcmd.name);
+				}
 			}
 			else if (find_fullpath(path, &currentcmd)){
 				if (DEBUG) { printf("executing with currentcmd.name = %s, argv[1]==NULL? %d\n", currentcmd.name, currentcmd.argv[1] == NULL); }
