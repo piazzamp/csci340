@@ -41,7 +41,7 @@ int main( int argc, char** argv ) {
 	char line[256], path[256];
 	command_t currentcmd;
 	while(!done){
-		printf("\nshhh~ ");
+		printf("shhh~ ");
 		fgets(line, 256, stdin);
 		// gets(line);
 		if (DEBUG){

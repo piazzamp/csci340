@@ -10,9 +10,8 @@
 #include <sys/stat.h>
 #include "shell.h"
 
-#define DEBUG 1
+#define DEBUG 0
 #define PATHSIZE 256
-#define PIPE |
 
 const char* valid_builtin_commands[] = {"cd", "exit", NULL};
 void parse( char* line, command_t* p_cmd );
@@ -161,6 +160,8 @@ int execute( command_t* p_cmd ){
 		close(fds[1]);
 		waitpid(pid1, &status, 0);
 		waitpid(pid2, &status, 0);
+		p_cmd->argv[pipeindex] = pipe_p;
+		// point that NULL back at the pipe so everything will be freed in main
 		return 0;
 	}
 /*
