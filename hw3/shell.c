@@ -23,7 +23,7 @@ void cleanup( command_t* p_cmd );
 
 //-------------------------------//
 // 	 BEGIN IMPLEMENTATION		//
-//					hw2					//
+//					hw2/3					//
 //        by Matt Piazza			//
 //-------------------------------//
 void parse( char* line, command_t* p_cmd ){
@@ -80,7 +80,7 @@ void parse( char* line, command_t* p_cmd ){
 
 
 int execute( command_t* p_cmd ){
-	int found1 = 0, found2 = 0, i, pipeindex = -1;
+	int found1 = 0, i, pipeindex = -1;
 	// if we see pipeindex > 0 then we know 2 cmds exist :)
 	char fpath1[256], fpath2[256], *pipe_p;
 	// put a new cmd on the stack for pipes
@@ -164,6 +164,7 @@ int execute( command_t* p_cmd ){
 		// point that NULL back at the pipe so everything will be freed in main
 		return 0;
 	}
+	return -1;
 /*
 	found = find_fullpath(fpath, p_cmd);
 	if (DEBUG) { printf("forking, hold on to ur butts\n"); }
