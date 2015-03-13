@@ -12,7 +12,7 @@
 #include <signal.h>
 #include "shell.h"
 
-#define DEBUG 1
+#define DEBUG 0
 #define PATHSIZE 256
 
 const char* valid_builtin_commands[] = {"cd", "exit", NULL};
