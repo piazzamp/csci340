@@ -203,7 +203,7 @@ int execute( command_t* p_cmd ){
             return -1;
 			}
 		}
-		waitpid(cpid, &child_status, 0);
+		return waitpid(cpid, &child_status, 0);
 		p_cmd->argv[redirindex] = redir_p;
 	}
 	return -1;

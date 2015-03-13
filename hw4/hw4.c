@@ -83,7 +83,7 @@ static void child_handler(int sig){
 	printf("in child_handler!\n");
 	int status;
 	pid_t pid;
-	while ( ( pid = waitpid(-1, &status, WNOHANG ) ) != -1 ) {
+	while ( ( pid = waitpid(-1, &status, WNOHANG ) ) > 0 ) {
 		printf("Child Process (%d) has Terminated\n", pid );
 	}
 	// exit(0);
