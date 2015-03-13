@@ -80,11 +80,11 @@ int main( int argc, char** argv ) {
 } // end main function
 
 static void child_handler(int sig){
-	printf("in child_handler!\n");
+	if (DEBUG) { printf("in child_handler!\n"); }
 	int status;
 	pid_t pid;
 	while ( ( pid = waitpid(-1, &status, WNOHANG ) ) > 0 ) {
-		printf("Child Process (%d) has Terminated\n", pid );
+		if (DEBUG) { printf("Child Process (%d) has Terminated\n", pid ); }
 	}
 	// exit(0);
 }
