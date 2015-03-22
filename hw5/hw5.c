@@ -83,8 +83,8 @@ int main( int argc, char** argv ) {
 		}
 	}
 	clock_gettime(CLOCK_REALTIME, &end);
-	elapsed = mydifftime(&start, &end);
-	printf("monte carlo value of pi: %.6f\nvalue of count: %.0f\ntime in seconds: %.4f\n", (gcount/(numits * numthreads)), gcount, elapsed);
+	elapsed = mydifftime(&end, &start);
+	printf("monte carlo value of pi: %.6f\nvalue of count: %.0f\ntime in seconds: %.4f\n", (4 * gcount/(numits * numthreads)), gcount, elapsed);
 	return 0;
 
 } // end main function
