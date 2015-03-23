@@ -3,6 +3,8 @@
 #include <time.h>
 #include "mcsim.h"
 
+#define DEBUG 1
+
 double gcount;    // global counter -- a double to handle large sums (billions+)
 long numits;      // global variable for number of iterations (see step 3 below)
 
@@ -63,6 +65,7 @@ int main( int argc, char** argv ) {
 	numthreads = atoi(argv[1]);
 	numits = atoi(argv[2]);
 	getrlimit(RLIMIT_NPROC, &max_threads);
+	if (DEBUG){ printf("max threads: cur=%d, max=%d\n", max_threads.rlim_cur, max_threads.rlim_max); }
 	if (numthreads > max_threads.rlim_cur){
 		fprintf(stderr, "you have exceeded the maximum number of threads (%llu), please try again\n", max_threads.rlim_cur);
 		exit(1);
