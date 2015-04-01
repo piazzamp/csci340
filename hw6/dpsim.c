@@ -90,9 +90,11 @@ void delay( long nanosec ) {
 
 
 void eat( int phil_id ) {
-	int left = (phil_id + 1) % 5, i;
-	if (chopsticks[phil_id] != -1 && chopsticks[phil_id] != phil_id)
+	int left = (phil_id + 1) % 5;
+	if (chopsticks[phil_id] != -1 && chopsticks[phil_id] != phil_id){
+		if (DEBUG) printf("right chopstick [%d] taken, sorry\n", phil_id);
 		return;
+	}
 		// go back to thinking to wait for the right stick to free up
 	pthread_mutex_lock(&(mutex[phil_id]));
 	// just set the lock to write into chopsticks array
@@ -100,8 +102,10 @@ void eat( int phil_id ) {
 	pthread_mutex_unlock(&(mutex[phil_id]));
 	// delay between picking up other chopstick
 	delay(7500);
-	if (chopsticks[left] != -1)
+	if (chopsticks[left] != -1){
+		if (DEBUG) printf("left chopstick [%d] taken, sorry\n", left);
 		return;
+	}
 		// if you grab the right chopstick but the left is taken
 		// return to thinking and try again later
 	pthread_mutex_lock(&(mutex[left]));
