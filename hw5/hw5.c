@@ -3,7 +3,7 @@
 #include <time.h>
 #include "mcsim.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 double gcount;    // global counter -- a double to handle large sums (billions+)
 long numits;      // global variable for number of iterations (see step 3 below)
