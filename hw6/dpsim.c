@@ -91,6 +91,7 @@ void delay( long nanosec ) {
 
 void eat( int phil_id ) {
 	int left = (phil_id + 1) % 5;
+	if (DEBUG) printf("right: %d  left: %d\n", phil_id, left);
 	if (chopsticks[phil_id] != -1 && chopsticks[phil_id] != phil_id){
 		if (DEBUG) printf("right chopstick [%d] taken, sorry\n", phil_id);
 		return;
