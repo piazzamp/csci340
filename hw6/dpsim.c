@@ -60,7 +60,7 @@ void* th_main( void* th_main_args ) {
 		}
 	}
 	for (i = 0; i < NUM_PHILOSOPHERS; i++){
-		pthread_kill(philosophers[i], SIGKILL);
+		pthread_kill(philosophers[i], 9);
 	}
 	pthread_exit(0);
 
