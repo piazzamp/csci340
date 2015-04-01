@@ -112,7 +112,7 @@ void eat( int phil_id ) {
 	pthread_mutex_lock(&(mutex[left]));
 	chopsticks[left] = phil_id;
 	pthread_mutex_unlock(&(mutex[left]));
-	delay(200000); // eat time
+	delay(20000); // eat time
 	pthread_mutex_lock(&(mutex[left]));
 	chopsticks[left] = -1;
 	pthread_mutex_unlock(&(mutex[left]));
