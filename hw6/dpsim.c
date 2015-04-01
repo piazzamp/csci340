@@ -33,7 +33,7 @@ void* th_main( void* th_main_args ) {
 		chopsticks[i] = -1;
 	}
 	for (i = 0; i < NUM_PHILOSOPHERS; i++){
-		if (pthread_create(&(philosophers[i]), NULL, th_phil, &i) != 0){
+		if (pthread_create(&(philosophers[i]), NULL, th_phil, (void*) i) != 0){
 			fprintf(stderr, "failed to create philosopher thread %d, terminating\n", i);
 			exit(1);
 		}
@@ -68,7 +68,7 @@ void* th_main( void* th_main_args ) {
 
 
 void* th_phil( void* th_phil_args ) {
-	int id = *((int*)th_phil_args);
+	int id = (int)th_phil_args;
 	while(1){
 		delay(15); // thinking...
 		eat(id);
