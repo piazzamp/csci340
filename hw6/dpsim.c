@@ -107,7 +107,7 @@ void eat( int phil_id ) {
 	chopsticks[phil_id] = phil_id;
 	pthread_mutex_unlock(&(mutex[phil_id]));
 	// delay between picking up other chopstick
-	delay(700);
+	delay(100);
 	if (chopsticks[left] != -1){
 	//	if (DEBUG) printf("left chopstick [%d] taken, sorry\n", left);
 		return;
