@@ -23,12 +23,19 @@ int isdead(){
 		else if (chopsticks[i] == chopsticks[(i +1) % 5]) return 0;
 		// can't have deadlock if anyone is successfully eating
 	}
+	if (DEBUG){
+      printf("chopsticks = {");
+      for (i = 0; i < NUM_CHOPSTICKS; i++){
+        printf("%d ", chopsticks[i]);
+      }
+      printf("}\n");
+   }
 	return 1;
 	
 }
 
 void* th_main( void* th_main_args ) {
-	int i, prev = -1;	
+	int i;
 	for (i = 0; i < NUM_CHOPSTICKS; i++){
 		chopsticks[i] = -1;
 	}
@@ -39,18 +46,16 @@ void* th_main( void* th_main_args ) {
 		}
 	}
 	while (1){
-		delay(8);
+		delay(50000);
 		if (isdead()){
 			printf("deadlocked...\n");
 			break;	
 		}
 		printf("philosopher(s) ");
 		for (i = 0; i < NUM_CHOPSTICKS; i++){
-			if (chopsticks[i] >= 0 && chopsticks[i] != prev) printf("%d, ", i);
-			prev = chopsticks[i];
+			if (chopsticks[i] == chopsticks[(i + 1) % 5]) printf("%d, ", i);	
 		}
 		printf("are eating\n");
-		prev = -1;
 		if (DEBUG){
 			printf("chopsticks = {");
 			for (i = 0; i < NUM_CHOPSTICKS; i++){
@@ -70,7 +75,7 @@ void* th_main( void* th_main_args ) {
 void* th_phil( void* th_phil_args ) {
 	int id = (int)th_phil_args;
 	while(1){
-		delay(15); // thinking...
+		delay(150000); // thinking...
 		eat(id);
 	}
 
@@ -91,9 +96,9 @@ void delay( long nanosec ) {
 
 void eat( int phil_id ) {
 	int left = (phil_id + 1) % 5;
-	if (DEBUG) printf("right: %d  left: %d\n", phil_id, left);
+	// if (DEBUG) printf("right: %d  left: %d\n", phil_id, left);
 	if (chopsticks[phil_id] != -1 && chopsticks[phil_id] != phil_id){
-		if (DEBUG) printf("right chopstick [%d] taken, sorry\n", phil_id);
+	//	if (DEBUG) printf("right chopstick [%d] taken, sorry\n", phil_id);
 		return;
 	}
 		// go back to thinking to wait for the right stick to free up
@@ -104,7 +109,7 @@ void eat( int phil_id ) {
 	// delay between picking up other chopstick
 	delay(7500);
 	if (chopsticks[left] != -1){
-		if (DEBUG) printf("left chopstick [%d] taken, sorry\n", left);
+	//	if (DEBUG) printf("left chopstick [%d] taken, sorry\n", left);
 		return;
 	}
 		// if you grab the right chopstick but the left is taken
@@ -112,7 +117,7 @@ void eat( int phil_id ) {
 	pthread_mutex_lock(&(mutex[left]));
 	chopsticks[left] = phil_id;
 	pthread_mutex_unlock(&(mutex[left]));
-	delay(20000); // eat time
+	delay(100000); // eat time
 	pthread_mutex_lock(&(mutex[left]));
 	chopsticks[left] = -1;
 	pthread_mutex_unlock(&(mutex[left]));
