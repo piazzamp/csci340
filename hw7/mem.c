@@ -3,7 +3,7 @@
 
 #include "mem.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 /*
   Physical memory array. This is a static global array for all functions in this file.  
@@ -57,6 +57,34 @@ int getfirstempty(){
 	return -1;
 }
 
+/*int smallest_chunk_larger_than(int size){
+	int i, chunksize, done = 0, bestindex, bestsize = 999999;
+	i = getfirstempty();
+	while (i < mem_size && !done){
+		chunksize = getchunk(i);
+		if (chunksize <= 0){
+			i++;
+		}
+		else if (chunksize == size){
+			//PERFECT FIT
+			if (DEBUG){ printf("\a\a P-P-P-PERFECT FIT for size %d at index %d\n", size, i); }
+			done = 1; // useless...
+			return i;
+		}
+		else if (chunksize > size && chunksize < bestsize){
+			// chunk found can fit the block and
+			// it is smaller than the next smallest block
+			bestindex = i;
+			bestsize = chunksize;
+		}
+		else {
+			// chunksize is smaller than 
+		}
+	}
+	if (DEBUG) { printf("[smallest_chunk] put %d blocks in a %d space at index %d\n", size, bestsize, bestindex); }
+	return bestindex;
+}*/
+
 void allocate(int size, int duration, int startindex){
 	int x;
 	for (x = 0; x < size; x++){
@@ -104,7 +132,7 @@ int firstfit(int size, int duration){
 }
 
 int nextfit(int size, int duration){
-	int i, chunksize, done = 0, tries = 0;
+	int i, chunksize, done = 0, tries = 0, hitend = 0;
 	i = last_placement_position;
 	while (i < mem_size && !done){
 		chunksize = getchunk(i);
@@ -115,6 +143,10 @@ int nextfit(int size, int duration){
 		else if (chunksize >= size){
 			if (DEBUG) { printf("[nextfit] allocated successfully\n"); }
 			allocate(size, duration, i);
+			last_placement_position = i;
+		
+	
+
 			done = 1;
 		}
 		else {
@@ -122,6 +154,11 @@ int nextfit(int size, int duration){
 			// aka: probed a block of memory 
 			tries++;
 			i += chunksize;
+			if (!hitend && i >= mem_size){
+				// wrap around once
+				hitend = 1;
+				i = i % mem_size;
+			}
 		}
 	}
 	if (done){
@@ -132,8 +169,46 @@ int nextfit(int size, int duration){
 }
 
 int bestfit(int size, int duration){
-	// scoop
-	return 0;
+   int i, chunksize, found = 0, bestindex, bestsize = mem_size + 1, tries = 0;
+   i = getfirstempty();
+   while (i < mem_size){
+      chunksize = getchunk(i);
+      if (chunksize <= 0){
+         i++;
+      }
+      else if (chunksize == size){
+         //PERFECT FIT
+         if (DEBUG){ printf("\a\a P-P-P-PERFECT FIT for size %d at index %d\n", size, i); }
+         found = 1; // useless...
+         return i;
+      }
+      else if (chunksize > size && chunksize < bestsize){
+         // chunk found can fit the block and
+         // it is smaller than the next smallest block
+         bestindex = i;
+         bestsize = chunksize;
+			found = 1;
+			i += chunksize;
+      }
+      else {
+         // chunksize is smaller than size
+			tries++;
+			i += chunksize;
+      }
+   } 
+
+	if (found){
+		if (DEBUG) {
+			printf("[bestfit] succes! put %d blocks in a %d space at index %d, it took %d probes\n", size, bestsize, bestindex, tries); 
+			print_mem();
+	}	
+		allocate(size, duration, bestindex);
+		return tries;
+	}
+	else{
+		if (DEBUG){ printf("[bestfit] failed to allocate memory on this pass (size : %d)\n", size); }
+		return -1;
+	}
 }
 /*
   Using the memory placement algorithm, strategy, allocate size
@@ -195,7 +270,7 @@ int mem_fragment_count(int frag_size){
 			cursize++;
 		}
 		else{
-			if (DEBUG) { printf("[frag counter] found a chunk of  size %d\n", cursize); }
+			if (DEBUG && cursize > 0) { printf("[frag counter] found a chunk of  size %d\n", cursize); }
 			if (cursize <= frag_size && cursize > 0){
 				count++;
 			}

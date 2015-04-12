@@ -3,7 +3,7 @@
 
 #include "mem.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 /* minimum and maximum duration of use for an allocated block of memory */
 #define MIN_DURATION      3
@@ -52,6 +52,7 @@ int main(int argc, char** argv){
 		total_frags = 0;
 		total_misses = 0;
 		total_probes = 0;
+		mem_clear();
 		switch (method){
 			case 0:
 				strategy = FIRST;
@@ -88,8 +89,7 @@ int main(int argc, char** argv){
 				if (result == -1){
 					total_misses += 1;
 				}
-				else {
-					if (DEBUG) { printf("incremented total_probes(%d) by %d\n", total_probes, result); }
+				else {	
 					total_probes += result;
 				}
 				mem_single_time_unit_transpired();
@@ -97,8 +97,8 @@ int main(int argc, char** argv){
 			total_frags += mem_fragment_count(3);
 		}
 	printf("%s:\tavg fragmentation: %.3f\tavg failures: %.3f\tavg probes: %.5f\n", strat_string, ((double) total_frags) / ((double) runs), ((double) total_misses)/((double) runs), ((double) total_probes)/((double) runs));
-	//printf("average number of fragments for method %s: %.3f\n", strat_string, ((double) total_frags) / ((double) runs));
-	}
 
+	}
+	mem_free();
   return 0;
 }
