@@ -5,7 +5,7 @@
 
 #include "disk.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 // initializes device and returns a 
 // disk_t full of metadata about the floppy
@@ -112,7 +112,7 @@ void sector_dump(Disk theDisk, int logicalSectorNumber, char type){
 			str = "%01x\t";
 			break;
 		case 'c':
-			str = "%c\t";
+			str = "%c";
 			break;
 		case 'o':
 			str = "%o\t";
@@ -122,7 +122,7 @@ void sector_dump(Disk theDisk, int logicalSectorNumber, char type){
 			exit(1);
 	}
 	for (i = 0; i < 32; i++){
-		printf("0x%08x\t", offset + (i * 16));
+		printf("0x%04x\t", offset + (i * 16));
 		for (j = 0; j < 16; j++){
 			printf(str, buf[(i * 16) + j]);
 		}
