@@ -1,3 +1,10 @@
+/*
+ *  Final Project option 2: floppy disk reading
+ * composed and compiled 
+ * by matt piazza and john anderson
+ * on 28 APR 2015 for Dr Tony Lerclerc's CSCI340
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

@@ -8,6 +8,7 @@ basically, we have to read some MS-DOS, FAT16 [file](floppy.img) and three basic
 
 you can also turn on some fun debugging by changing line 8 of [disk.c](disk.c#L8) to `#define DEBUG 1`
 
+[more info](http://www.win.tue.nl/~aeb/linux/fs/fat/fat-1.html) on the fat16 metadata used int physical\_disk
 
 ###example usage and output:
     ./dump floppy.img 35 x
